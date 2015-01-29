@@ -84,7 +84,7 @@ def getPCA(data, dims):
     # Get the PCA of that data
     pca = PCA(n_components=dims)
     X_r = pca.fit(data).transform(data)
-    pcVals = [str(round(pc, 3)) for pc in pca.explained_variance_ratio_]
+    pcVals = [str(round(pc, 4)) for pc in pca.explained_variance_ratio_]
 
     return X_r, pcVals
 
