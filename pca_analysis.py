@@ -2,13 +2,11 @@
 
 from __future__ import unicode_literals, print_function
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import argparse
 import sys
 from mpl_toolkits.mplot3d import Axes3D
-from mpl_animations_from_static_3d import rotanimate
 
 
 def main():
@@ -149,13 +147,6 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, show_flag, save_flag):
         pngPath = csvPath.replace(".csv", ".png")
         fig.savefig(pngPath, bbox_inches="tight")
         fig_legend.savefig(pngPath.replace(".png", "_legend.png"))
-
-        if proj3D:
-            # Take 20 angles between 0 & 360
-            angles = np.linspace(0, 360, 21)[:-1]
-            # create an animated gif (20ms between frames)
-            rotanimate(ax, angles,
-                       pngPath.replace(".png", "_movie.gif"), delay=20)
 
     # Show figures
     if show_flag:
