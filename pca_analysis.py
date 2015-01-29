@@ -150,10 +150,12 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, show_flag, save_flag):
         fig.savefig(pngPath, bbox_inches="tight")
         fig_legend.savefig(pngPath.replace(".png", "_legend.png"))
 
-        # Take 20 angles between 0 & 360
-        angles = np.linspace(0, 360, 21)[:-1]
-        # create an animated gif (20ms between frames)
-        rotanimate(ax, angles, pngPath.replace(".png", "_movie.gif"), delay=20)
+        if proj3D:
+            # Take 20 angles between 0 & 360
+            angles = np.linspace(0, 360, 21)[:-1]
+            # create an animated gif (20ms between frames)
+            rotanimate(ax, angles,
+                       pngPath.replace(".png", "_movie.gif"), delay=20)
 
     # Show figures
     if show_flag:
