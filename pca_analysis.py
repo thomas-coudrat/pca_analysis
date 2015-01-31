@@ -79,8 +79,6 @@ def getPCA(data, dims, rounded):
     number of dimentions to be returned
     """
 
-    print(rounded)
-
     # Get the PCA of that data
     pca = PCA(n_components=dims)
     X_r = pca.fit(data).transform(data)
@@ -101,8 +99,6 @@ def displayInfo(df, pcVals):
     for i, pc in enumerate(pcVals):
         print("PC" + str(i+1) + " = " + str(pc) + " %")
 
-    print("\n")
-
 
 def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
     """
@@ -119,9 +115,9 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
             newCol = makeColor(col)
             Axes3D.scatter(ax, x, y, z, label=label, color=newCol,
                            marker="o", lw=1, s=800)
-        ax.set_xlabel("PC1 (" + '{0:g}'.format(pcVals[0]) + "%)", fontsize=30)
-        ax.set_ylabel("PC2 (" + '{0:g}'.format(pcVals[1]) + "%)", fontsize=30)
-        ax.set_zlabel("PC3 (" + '{0:g}'.format(pcVals[2]) + "%)", fontsize=30)
+        ax.set_xlabel("PC1 (" + '{0:g}'.format(pcVals[0]) + " %)", fontsize=30)
+        ax.set_ylabel("PC2 (" + '{0:g}'.format(pcVals[1]) + " %)", fontsize=30)
+        ax.set_zlabel("PC3 (" + '{0:g}'.format(pcVals[2]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=20)
     else:
         ax = fig.add_subplot(111)
@@ -130,8 +126,8 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
             ax.scatter(x, y, label=label, color=newCol, marker="o", lw=1, s=800)
             # ax.annotate(label, xy=(x, y - 0.05), fontsize=10,
             #             ha='center', va='top')
-        ax.set_xlabel("PC1 (" + '{0:g}'.format(pcVals[0]) + "%)", fontsize=30)
-        ax.set_ylabel("PC2 (" + '{0:g}'.format(pcVals[1]) + "%)", fontsize=30)
+        ax.set_xlabel("PC1 (" + '{0:g}'.format(pcVals[0]) + " %)", fontsize=30)
+        ax.set_ylabel("PC2 (" + '{0:g}'.format(pcVals[1]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=30)
 
     # figTitle = "PCA on " + csvPath + " (PC1=" + pcVals[0] + ", PC2=" +
@@ -145,14 +141,16 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
                   loc="center", fancybox=True,
                   shadow=True, prop={"size": 30})
 
-    plt.show()
-
     # Save figures if save flag was used
     if save_flag:
         print("\nSAVING figures\n")
         pngPath = csvPath.replace(".csv", ".png")
         fig.savefig(pngPath, bbox_inches="tight")
         fig_legend.savefig(pngPath.replace(".png", "_legend.png"))
+    # Otherwise show the plots
+    else:
+        print("\nSHOWING figures\n")
+        plt.show()
 
 
 def makeColor(colorRGB):
