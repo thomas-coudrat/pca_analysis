@@ -5,7 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import argparse
-import sys
 from mpl_toolkits.mplot3d import Axes3D
 
 
@@ -14,7 +13,7 @@ def main():
     Runs the pca_analysis script
     """
     # Collect arguments
-    csvPath, proj3D, show_flag, save_flag = parsing()
+    csvPath, proj3D, save_flag = parsing()
 
     # Prepare the data table
     df = pd.read_csv(filepath_or_buffer=csvPath, index_col=0, sep=",")
@@ -35,7 +34,7 @@ def main():
     displayInfo(df, pcValsAll)
 
     # Run the plotting function
-    plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, show_flag, save_flag)
+    plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag)
 
 
 def parsing():
@@ -49,28 +48,21 @@ def parsing():
         " instance and the first value is its name followed" \
         " by its variables"
     descr_proj3D = "Use this flag for a 3D projection of the data"
-    descr_show = "Use this flag if you want to show the figures upon execution"
     descr_save = "Use this flag if you want to save the figures upon execution"
 
     parser = argparse.ArgumentParser(description=descr)
 
     parser.add_argument("csvPath", help=descr_csvPath)
     parser.add_argument("-proj3D", action="store_true", help=descr_proj3D)
-    parser.add_argument("-show", action="store_true", help=descr_show)
     parser.add_argument("-save", action="store_true", help=descr_save)
 
     args = parser.parse_args()
 
     csvPath = args.csvPath
     proj3D = args.proj3D
-    show_flag = args.show
     save_flag = args.save
 
-    if not show_flag and not save_flag:
-        print("Select at least one of the flags -show or -save")
-        sys.exit()
-
-    return csvPath, proj3D, show_flag, save_flag
+    return csvPath, proj3D, save_flag
 
 
 def getPCA(data, dims):
@@ -100,7 +92,7 @@ def displayInfo(df, pcVals):
         print("PC" + str(i+1) + " = " + pc)
 
 
-def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, show_flag, save_flag):
+def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
     """
     Plot the PCA data on 2D plot
     """
@@ -141,17 +133,14 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, show_flag, save_flag):
                   loc="center", fancybox=True,
                   shadow=True, prop={"size": 30})
 
-    # Save figures
+    plt.show()
+
+    # Save figures if save flag was used
     if save_flag:
         print("\nSAVING figures\n")
         pngPath = csvPath.replace(".csv", ".png")
         fig.savefig(pngPath, bbox_inches="tight")
         fig_legend.savefig(pngPath.replace(".png", "_legend.png"))
-
-    # Show figures
-    if show_flag:
-        print("\nSHOWING figures\n")
-        plt.show()
 
 
 def makeColor(colorRGB):
