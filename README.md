@@ -1,13 +1,32 @@
-## pca_analysis
-### projection of a multivariate dataset onto its the top 2 or 3 calculated principal components
+# pca_analysis: from multivariate dataset to PCA plot
 
-**Calculate PCA from data stored in a .csv file and display it in a 2D plot (optional 3D)**
+### Description
+* Calculate principal component analysis on multivariate data stored in a .csv
+    file and display it in a 2D plot (optional 3D)
 
-*How to use:*
-  * Prepare you data in a comma separated file (csv) the following format, note that the column *color* is required and must be written as described (not Color, colour, COLOR etc...)
-  * An example file is inculded in data/random_data.csv
-  * Run the example using:
-`python pca_analysis data/random_data.csv -show`
+### Overview
+* Takes a set a comma separated value (.csv) file as argument: this file should have a set of observations along with multiple variables on each of these observations
+* Calculates principal component analysis (PCA): PCA is a dimentionality reduction algorithm with uses transformations of a dataset and projects it onto a lower set of variables called principal components (PCs). The PCs extract the important information from the data, revealing its internal structure in a way that best explains its variance.
+* It plots the PCA data: choose 2D (default) or 3D projection and show (default) or save the PCA plot and legend.
 
-*Requirements*:
-  * scipy (pandas, numpy, matplotlib, scikit-learn)
+### Getting started
+* Installation and prerequisites
+    * The easiest way to get started is to download use the Anaconda distrubution, which includes Python along with the SciPy libraries. Note that this is a >330 Mb file.
+        * http://continuum.io/downloads
+    * Then download the content of this repository and unpack on your computer. If you are already using git, use:
+        ```bash
+        git clone https://github.com/thomas-coudrat/pca_analysis.git
+        ```
+    * Example: navigate to the directory and run the following:
+        ```bash
+        python pca_analysis data/random_data.csv
+        ```
+    * Help: get more info about the optional arguments
+        ```bash
+        python pca_analysis --help
+        ```
+    * Data (.csv file): have a look at the file data/random_data.csv. The formatting of your data should follow the same rules: row and column names AND a column name 'color' with RGB colors as follows 'R:G:B'.
+
+* Additional information
+    * The script makes use of the following Scipy libraries: pandas, matplotlib, scikit-learn
+    * The PCA is performed using scikit-learn which relies on singular value decomposition
