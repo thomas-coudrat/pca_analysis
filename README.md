@@ -11,9 +11,9 @@
 
 ### Getting started
 * Installation and prerequisites
-    * The easiest way to get started is to download use the Anaconda distrubution, which includes Python along with the SciPy libraries. Note that this is a >330 Mb file.
+    * The easiest way to get started is to download the Anaconda distribution, which includes Python along with the SciPy libraries (and other scientific Python libraries). Note that this is a >330 Mb file.
         * http://continuum.io/downloads
-    * Then download the content of this repository and unpack on your computer. If you are already using git, use:
+    * Then download the content of this repository and unpack on your computer. Or if you are already using git, use:
         
         ```bash
         git clone https://github.com/thomas-coudrat/pca_analysis.git
