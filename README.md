@@ -14,17 +14,23 @@
     * The easiest way to get started is to download use the Anaconda distrubution, which includes Python along with the SciPy libraries. Note that this is a >330 Mb file.
         * http://continuum.io/downloads
     * Then download the content of this repository and unpack on your computer. If you are already using git, use:
+        
         ```bash
         git clone https://github.com/thomas-coudrat/pca_analysis.git
         ```
+
     * Example: navigate to the directory and run the following:
+        
         ```bash
         python pca_analysis data/random_data.csv
         ```
+
     * Help: get more info about the optional arguments
+        
         ```bash
         python pca_analysis --help
         ```
+
     * Data (.csv file): have a look at the file data/random_data.csv. The formatting of your data should follow the same rules: row and column names AND a column name 'color' with RGB colors as follows 'R:G:B'.
 
 * Additional information
