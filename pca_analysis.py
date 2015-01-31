@@ -13,7 +13,7 @@ def main():
     Runs the pca_analysis script
     """
     # Collect arguments
-    csvPath, proj3D, save_flag = parsing()
+    csvPath, rounded, proj3D, save_flag = parsing()
 
     # Prepare the data table
     df = pd.read_csv(filepath_or_buffer=csvPath, index_col=0, sep=",")
@@ -24,11 +24,11 @@ def main():
 
     # Get the PCA for all dimentions (pc values),
     # and for the 2 dimentions (graph)
-    X_r, pcValsAll = getPCA(dfValues, dims)
+    X_r, pcValsAll = getPCA(dfValues, dims, 6)
     if proj3D:
-        X_r, pcVals = getPCA(dfValues, 3)
+        X_r, pcVals = getPCA(dfValues, 3, rounded)
     else:
-        X_r, pcVals = getPCA(dfValues, 2)
+        X_r, pcVals = getPCA(dfValues, 2, rounded)
 
     # Displaying information to the terminal
     displayInfo(df, pcValsAll)
@@ -47,34 +47,44 @@ def parsing():
     descr_csvPath = "Path of the .csv file, each line is a" \
         " instance and the first value is its name followed" \
         " by its variables"
+    descr_rounded = "Decimal at which principal components are rounded" \
+        " (default=2)"
     descr_proj3D = "Use this flag for a 3D projection of the data"
     descr_save = "Use this flag if you want to save the figures upon execution"
 
     parser = argparse.ArgumentParser(description=descr)
 
     parser.add_argument("csvPath", help=descr_csvPath)
+    parser.add_argument("--rounded", type=int, help=descr_rounded)
     parser.add_argument("-proj3D", action="store_true", help=descr_proj3D)
     parser.add_argument("-save", action="store_true", help=descr_save)
 
     args = parser.parse_args()
 
     csvPath = args.csvPath
+    # Default to rounded at second decimal if nothing else is provided
+    if args.rounded:
+        rounded = args.rounded
+    else:
+        rounded = 0
     proj3D = args.proj3D
     save_flag = args.save
 
-    return csvPath, proj3D, save_flag
+    return csvPath, rounded, proj3D, save_flag
 
 
-def getPCA(data, dims):
+def getPCA(data, dims, rounded):
     """
     Return the PCA data and principal component values given a dataset and a
     number of dimentions to be returned
     """
 
+    print(rounded)
+
     # Get the PCA of that data
     pca = PCA(n_components=dims)
     X_r = pca.fit(data).transform(data)
-    pcVals = [str(round(pc, 4)) for pc in pca.explained_variance_ratio_]
+    pcVals = [round(100 * pc, rounded) for pc in pca.explained_variance_ratio_]
 
     return X_r, pcVals
 
@@ -89,7 +99,9 @@ def displayInfo(df, pcVals):
 
     print("\n## Principal Components ##\n")
     for i, pc in enumerate(pcVals):
-        print("PC" + str(i+1) + " = " + pc)
+        print("PC" + str(i+1) + " = " + str(pc) + " %")
+
+    print("\n")
 
 
 def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
@@ -107,9 +119,9 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
             newCol = makeColor(col)
             Axes3D.scatter(ax, x, y, z, label=label, color=newCol,
                            marker="o", lw=1, s=800)
-        ax.set_xlabel("PC1 (" + pcVals[0] + ")", fontsize=30)
-        ax.set_ylabel("PC2 (" + pcVals[1] + ")", fontsize=30)
-        ax.set_zlabel("PC3 (" + pcVals[2] + ")", fontsize=30)
+        ax.set_xlabel("PC1 (" + '{0:g}'.format(pcVals[0]) + "%)", fontsize=30)
+        ax.set_ylabel("PC2 (" + '{0:g}'.format(pcVals[1]) + "%)", fontsize=30)
+        ax.set_zlabel("PC3 (" + '{0:g}'.format(pcVals[2]) + "%)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=20)
     else:
         ax = fig.add_subplot(111)
@@ -118,8 +130,8 @@ def plotPCA(proj3D, X_r, pcVals, ligs, colors, csvPath, save_flag):
             ax.scatter(x, y, label=label, color=newCol, marker="o", lw=1, s=800)
             # ax.annotate(label, xy=(x, y - 0.05), fontsize=10,
             #             ha='center', va='top')
-        ax.set_xlabel("PC1 (" + pcVals[0] + ")", fontsize=30)
-        ax.set_ylabel("PC2 (" + pcVals[1] + ")", fontsize=30)
+        ax.set_xlabel("PC1 (" + '{0:g}'.format(pcVals[0]) + "%)", fontsize=30)
+        ax.set_ylabel("PC2 (" + '{0:g}'.format(pcVals[1]) + "%)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=30)
 
     # figTitle = "PCA on " + csvPath + " (PC1=" + pcVals[0] + ", PC2=" +
