@@ -9,6 +9,10 @@
 * Calculates principal component analysis (PCA): PCA is a dimentionality reduction algorithm with uses transformations of a dataset and projects it onto a lower set of variables called principal components (PCs). The PCs extract the important information from the data, revealing its internal structure in a way that best explains its variance.
 * It plots the PCA data: choose 2D (default) or 3D projection and show (default) or save the PCA plot and legend.
 
+### Citation
+* v1.0 of this script was atributed a DOI:
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.14735.svg)](http://dx.doi.org/10.5281/zenodo.14735)
+
 ### Getting started
 * Installation and prerequisites
     * The easiest way to get started is to download the Anaconda distribution, which includes Python along with the SciPy libraries (and other scientific Python libraries). Note that this is a >330 Mb file.
@@ -22,13 +26,13 @@
     * Example: navigate to the directory and run the following:
         
         ```bash
-        python pca_analysis data/random_data.csv
+        python pca_analysis.py data/random_data.csv
         ```
 
     * Help: get more info about the optional arguments
         
         ```bash
-        python pca_analysis --help
+        python pca_analysis.py --help
         ```
 
     * Data (.csv file): have a look at the file data/random_data.csv. The formatting of your data should follow the same rules: row and column names AND a column name 'color' with RGB colors as follows 'R:G:B'.
