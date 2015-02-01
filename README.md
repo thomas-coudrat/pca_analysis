@@ -10,7 +10,7 @@
 * It plots the PCA data: choose 2D (default) or 3D projection and show (default) or save the PCA plot and legend.
 
 ### Citation
-* v1.0 of this script was atributed a DOI:
+* v1.0 of this script was attributed a DOI:
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.14735.svg)](http://dx.doi.org/10.5281/zenodo.14735)
 
 ### Getting started
