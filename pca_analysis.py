@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+#
+# Thomas Coudrat <thomas.coudrat@gmail.com>
+# Janurary 2015
+#
+
 from __future__ import unicode_literals, print_function
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -28,7 +33,7 @@ def main():
     X_r, PCs, loadings = getPCA(dfData)
 
     # Displaying information to the terminal
-    displayInfo(df, PCs, loadings, features)
+    displaySaveLog(csvPath, df, PCs, loadings, features)
 
     # Round PC values for plotting
     PCs_round = [round(100 * pc, rounded) for pc in PCs]
@@ -86,25 +91,41 @@ def getPCA(data):
     return X_r, pca.explained_variance_ratio_, pca.components_
 
 
-def displayInfo(df, PCs, loadings, features):
+def displaySaveLog(csvPath, df, PCs, loadings, features):
     """
     Print out the information to the terminal
     """
 
-    print("\n## Data table ##\n")
+    fileLog = open(csvPath.replace(".csv", "_log.csv"), "w")
+
+    # Data table
+    dataTitle = "\n## Data table ##\n"
+    print(dataTitle)
     print(df)
+    fileLog.write(dataTitle)
+    df.to_csv(fileLog)
 
-    print("\n## Principal Components ##\n")
+    # Principal components
+    pcTitle = "\n## Principal Components ##\n"
+    print(pcTitle)
+    fileLog.write(pcTitle)
+    PC_names = []
     for i, pc in enumerate(PCs):
-        print("PC" + str(i+1) + " = " + str(round(100*pc, 6)) + " %")
+        currentPCname = "PC" + str(i+1)
+        PC_names.append(currentPCname)
+        pcLine = currentPCname + " = " + str(round(100*pc, 6)) + " %"
+        print(pcLine)
+        fileLog.write(pcLine + "\n")
 
-    print("\n## Loadings ##\n")
+    # Loadings
+    loadTitle = "\n## Loadings ##\n"
+    loadingsDf = pd.DataFrame(loadings, index=PC_names, columns=features)
+    print(loadTitle)
+    print(loadingsDf)
+    fileLog.write(loadTitle)
+    loadingsDf.to_csv(fileLog)
 
-    # PC_names = ["PC" + str(i+1) for i, pc in enumerate(len(PCs))]
-
-    # print(PC_names)
-    # print(pd.DataFrame(loadings, index=PC_names, columns=features))
-    print(pd.DataFrame(loadings))
+    fileLog.close()
 
 
 def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, save_flag):
