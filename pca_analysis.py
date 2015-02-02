@@ -33,7 +33,7 @@ def main():
     X_r, PCs, loadings = getPCA(dfData)
 
     # Displaying information to the terminal
-    displaySaveLog(csvPath, df, PCs, loadings, features)
+    displaySaveLog(csvPath, df, PCs, loadings, features, save_flag)
 
     # Round PC values for plotting
     PCs_round = [round(100 * pc, rounded) for pc in PCs]
@@ -91,41 +91,55 @@ def getPCA(data):
     return X_r, pca.explained_variance_ratio_, pca.components_
 
 
-def displaySaveLog(csvPath, df, PCs, loadings, features):
+def displaySaveLog(csvPath, df, PCs, loadings, features, save_flag):
     """
     Print out the information to the terminal
     """
-
-    fileLog = open(csvPath.replace(".csv", "_log.csv"), "w")
 
     # Data table
     dataTitle = "\n## Data table ##\n"
     print(dataTitle)
     print(df)
-    fileLog.write(dataTitle)
-    df.to_csv(fileLog)
 
     # Principal components
     pcTitle = "\n## Principal Components ##\n"
     print(pcTitle)
-    fileLog.write(pcTitle)
     PC_names = []
+    pcLines = []
     for i, pc in enumerate(PCs):
         currentPCname = "PC" + str(i+1)
         PC_names.append(currentPCname)
         pcLine = currentPCname + " = " + str(round(100*pc, 6)) + " %"
         print(pcLine)
-        fileLog.write(pcLine + "\n")
+        pcLines.append(pcLine + "\n")
 
     # Loadings
     loadTitle = "\n## Loadings ##\n"
     loadingsDf = pd.DataFrame(loadings, index=PC_names, columns=features)
     print(loadTitle)
     print(loadingsDf)
-    fileLog.write(loadTitle)
-    loadingsDf.to_csv(fileLog)
 
-    fileLog.close()
+    # If the save flag was used
+    if save_flag:
+
+        # Open file
+        fileLog = open(csvPath.replace(".csv", "_log.csv"), "w")
+
+        # Data table
+        fileLog.write(dataTitle)
+        df.to_csv(fileLog)
+
+        # Principal components
+        fileLog.write(pcTitle)
+        for l in pcLines:
+            fileLog.write(l)
+
+        # Loadings
+        fileLog.write(loadTitle)
+        loadingsDf.to_csv(fileLog)
+
+        # Close file!
+        fileLog.close()
 
 
 def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, save_flag):
@@ -147,6 +161,7 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, save_flag):
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.set_zlabel("PC3 (" + '{0:g}'.format(PCs[2]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=20)
+        pngPath = csvPath.replace(".csv", "_3D.png")
     else:
         ax = fig.add_subplot(111)
         for label, col, x, y in zip(ligs, colors, X_r[:, 0], X_r[:, 1]):
@@ -157,6 +172,7 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, save_flag):
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=30)
+        pngPath = csvPath.replace(".csv", "_2D.png")
 
     # figTitle = "PCA on " + csvPath + " (PC1=" + pcVals[0] + ", PC2=" +
     # pcVals[1] + ")"
@@ -172,7 +188,6 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, save_flag):
     # Save figures if save flag was used
     if save_flag:
         print("\nSAVING figures\n")
-        pngPath = csvPath.replace(".csv", ".png")
         fig.savefig(pngPath, bbox_inches="tight")
         fig_legend.savefig(pngPath.replace(".png", "_legend.png"))
     # Otherwise show the plots
