@@ -37,8 +37,8 @@ def main():
     elif fl_log:
         dfData = dfData.apply(np.log)
 
-    # Get the PCA for all dimentions (pc values),
-    # and for the 2 dimentions (graph)
+    # Get the PCA for all dimensions (pc values),
+    # and for the 2 dimensions (graph)
     X_r, PCs, loadings = getPCA(dfData)
 
     # Displaying information to the terminal
@@ -67,7 +67,7 @@ def parsing():
     descr_proj3D = "Use this flag for a 3D projection of the data"
     descr_save = "Use this flag if you want to save the figures upon execution"
     descr_norm = "Use this flag to normalise the data to values between [0-1]"
-    descr_std = "Use this flag to standartise the data to have 0 mean and" \
+    descr_std = "Use this flag to standardise the data to have 0 mean and" \
         " unit variance"
     descr_log = "Use this flag to apply a log to the data"
 
@@ -101,7 +101,7 @@ def parsing():
 def getPCA(data):
     """
     Return the PCA data and principal component values given a dataset and a
-    number of dimentions to be returned
+    number of dimensions to be returned
     """
 
     # Get the PCA of that data
