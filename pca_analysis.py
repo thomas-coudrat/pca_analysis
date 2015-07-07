@@ -12,6 +12,7 @@ from sklearn.decomposition import PCA
 import argparse
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 
 def main():
@@ -20,7 +21,7 @@ def main():
     """
 
     # Collect arguments
-    csvPath, rounded, proj3D, fl_save, fl_norm, fl_std, fl_log = parsing()
+    csvPath, rounded, proj3D, fl_save, fl_std, fl_log = parsing()
 
     # Prepare the data table
     df = pd.read_csv(filepath_or_buffer=csvPath, index_col=0, sep=",")
@@ -30,20 +31,20 @@ def main():
     features = dfData.columns.values
 
     # Apply data transformation if requested
-    if fl_norm:
-        pass
-    elif fl_std:
-        pass
+    if fl_std:
+        csvPath = csvPath.replace(".csv", "-std.csv")
+        dfData = StandardScaler().fit_transform(dfData)
+        dfData = pd.DataFrame(dfData)
     elif fl_log:
+        csvPath = csvPath.replace(".csv", "-log.csv")
         dfData = dfData.apply(np.log)
 
-    # Get the PCA for all dimensions (pc values),
-    # and for the 2 dimensions (graph)
+    # Get the PCA for all dimensions (pc values)
     X_r, PCs, loadings = getPCA(dfData)
 
     # Displaying information to the terminal
     displaySaveLog(csvPath, df, dfData, PCs, loadings, features, fl_save,
-                   fl_norm, fl_std, fl_log)
+                   fl_std, fl_log)
 
     # Round PC values for plotting
     PCs_round = [round(100 * pc, rounded) for pc in PCs]
@@ -66,7 +67,6 @@ def parsing():
         " (default=2)"
     descr_proj3D = "Use this flag for a 3D projection of the data"
     descr_save = "Use this flag if you want to save the figures upon execution"
-    descr_norm = "Use this flag to normalise the data to values between [0-1]"
     descr_std = "Use this flag to standardise the data to have 0 mean and" \
         " unit variance"
     descr_log = "Use this flag to apply a log to the data"
@@ -77,7 +77,6 @@ def parsing():
     parser.add_argument("--rounded", type=int, help=descr_rounded)
     parser.add_argument("-proj3D", action="store_true", help=descr_proj3D)
     parser.add_argument("-save", action="store_true", help=descr_save)
-    parser.add_argument("-norm", action="store_true", help=descr_norm)
     parser.add_argument("-std", action="store_true", help=descr_std)
     parser.add_argument("-log", action="store_true", help=descr_log)
 
@@ -91,14 +90,13 @@ def parsing():
         rounded = 0
     proj3D = args.proj3D
     flag_save = args.save
-    flag_norm = args.norm
     flag_std = args.std
     flag_log = args.log
 
-    return csvPath, rounded, proj3D, flag_save, flag_norm, flag_std, flag_log
+    return csvPath, rounded, proj3D, flag_save, flag_std, flag_log
 
 
-def getPCA(data):
+def getPCA(dfData):
     """
     Return the PCA data and principal component values given a dataset and a
     number of dimensions to be returned
@@ -106,13 +104,26 @@ def getPCA(data):
 
     # Get the PCA of that data
     pca = PCA()
-    X_r = pca.fit_transform(data)
+    X_r = pca.fit_transform(dfData)
+
+    # Check that the principal components have variance 1.0 which is equivalent
+    # to each coefficient vector having norm 1.0
+    coeffVectorNorms = np.linalg.norm(pca.components_.T, axis=0)
+    print("Variance of PCs, check if equal to 1")
+    print(coeffVectorNorms)
+
+    # Check that the principal components can be calculated as the dot product
+    # of the above coefficients and the original variables
+    dotProduct = np.allclose(dfData.values.dot(pca.components_.T),
+                             pca.fit_transform(dfData.values))
+    print("PCs can be calculated as dot product of loadings and"
+          " original values: " + str(dotProduct))
 
     return X_r, pca.explained_variance_ratio_, pca.components_
 
 
 def displaySaveLog(csvPath, df, dfData, PCs, loadings, features, fl_save,
-                   fl_norm, fl_std, fl_log):
+                   fl_std, fl_log):
     """
     Print out the information to the terminal
     """
@@ -124,9 +135,7 @@ def displaySaveLog(csvPath, df, dfData, PCs, loadings, features, fl_save,
 
     # Transformation
     print("\n## Transformed data ##\n")
-    if fl_norm:
-        print("Normalised")
-    elif fl_std:
+    if fl_std:
         print("Standardised")
     elif fl_log:
         print("Logarithmic")
@@ -152,6 +161,9 @@ def displaySaveLog(csvPath, df, dfData, PCs, loadings, features, fl_save,
 
     # If the save flag was used
     if fl_save:
+
+        # Saving loadings
+        loadingsDf.to_csv(csvPath.replace(".csv", "_loadings.csv"))
 
         # Open file
         fileLog = open(csvPath.replace(".csv", "_info.txt"), "w")
@@ -197,7 +209,8 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
         ax = fig.add_subplot(111)
         for label, col, x, y in zip(ligs, colors, X_r[:, 0], X_r[:, 1]):
             newCol = makeColor(col)
-            ax.scatter(x, y, label=label, color=newCol, marker="o", lw=1, s=800)
+            ax.scatter(x, y, label=label, color=newCol,
+                       marker="o", lw=1, s=800)
             # ax.annotate(label, xy=(x, y - 0.05), fontsize=10,
             #             ha='center', va='top')
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
