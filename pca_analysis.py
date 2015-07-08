@@ -141,28 +141,28 @@ def displaySaveLog(csvPath, df, dfData, dfDataScaled,
     """
 
     # Original dataset
-    origTitle = "\n## Original dataset ##\n"
+    origTitle = col.red + "\n## Original dataset ##\n" + col.end
     print(origTitle)
     print(df)
 
     # Data only
-    rawTitle = "\n## Extracted data ##\n"
+    rawTitle = col.red + "\n## Extracted data ##\n" + col.end
     print(rawTitle)
     print(dfData)
 
     # Transformation
-    transfTitle = "\n## Transformed dataset ##\n"
+    transfTitle = col.red + "\n## Transformed dataset ##\n" + col.end
     if fl_std:
         print(transfTitle)
-        print("Standardised (mean=0; std_dev=1)\n")
+        print(col.blue + "Standardised (mean=0; std_dev=1)\n" + col.end)
         print(dfDataScaled)
     elif fl_minMax:
         print(transfTitle)
-        print("MinMax scaled (normalisation)\n")
+        print(col.blue + "MinMax scaled (normalisation)\n" + col.end)
         print(dfDataScaled)
 
     # Principal components
-    pcTitle = "\n## Principal Components ##\n"
+    pcTitle = col.red + "\n## Principal Components ##\n" + col.end
     print(pcTitle)
     PC_names = []
     pcLines = []
@@ -174,7 +174,7 @@ def displaySaveLog(csvPath, df, dfData, dfDataScaled,
         pcLines.append(pcLine + "\n")
 
     # Loadings
-    loadTitle = "\n## Loadings ##\n"
+    loadTitle = col.red + "\n## Loadings ##\n" + col.end
     loadingsDf = pd.DataFrame(loadings, index=PC_names, columns=features)
     print(loadTitle)
     print(loadingsDf)
@@ -265,6 +265,19 @@ def makeColor(colorRGB):
     """
     return [float(col)/255. for col in colorRGB.split(":")]
 
+
+class col:
+    """
+    Adding some colours to stdout
+    """
+    head = '\033[95m'
+    blue = '\033[94m'
+    green = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    end = '\033[0m'
+    BOLD = '\033[1m'
+    red = '\033[31m'
 
 if __name__ == "__main__":
     main()
