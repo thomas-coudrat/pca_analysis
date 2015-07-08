@@ -12,7 +12,7 @@ from sklearn.decomposition import PCA
 import argparse
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     """
 
     # Collect arguments
-    csvPath, rounded, proj3D, fl_save, fl_std, fl_log = parsing()
+    csvPath, rounded, proj3D, fl_save, fl_std, fl_minMax = parsing()
 
     # Prepare the data table
     df = pd.read_csv(filepath_or_buffer=csvPath, index_col=0, sep=",")
@@ -33,18 +33,26 @@ def main():
     # Apply data transformation if requested
     if fl_std:
         csvPath = csvPath.replace(".csv", "-std.csv")
-        dfData = StandardScaler().fit_transform(dfData)
-        dfData = pd.DataFrame(dfData)
-    elif fl_log:
-        csvPath = csvPath.replace(".csv", "-log.csv")
-        dfData = dfData.apply(np.log)
+        dfDataScaled = StandardScaler().fit_transform(dfData)
+        dfDataScaled = pd.DataFrame(dfDataScaled,
+                                    index=samples,
+                                    columns=features)
+    elif fl_minMax:
+        csvPath = csvPath.replace(".csv", "-minMax.csv")
+        dfDataScaled = MinMaxScaler().fit_transform(dfData)
+        dfDataScaled = pd.DataFrame(dfDataScaled,
+                                    index=samples,
+                                    columns=features)
+    else:
+        dfDataScaled = dfData
 
     # Get the PCA for all dimensions (pc values)
-    X_r, PCs, loadings = getPCA(dfData)
+    X_r, PCs, loadings = getPCA(dfDataScaled)
 
     # Displaying information to the terminal
-    displaySaveLog(csvPath, df, dfData, PCs, loadings, features, fl_save,
-                   fl_std, fl_log)
+    displaySaveLog(csvPath, df, dfData, dfDataScaled,
+                   PCs, loadings, features,
+                   fl_save, fl_std, fl_minMax)
 
     # Round PC values for plotting
     PCs_round = [round(100 * pc, rounded) for pc in PCs]
@@ -69,7 +77,8 @@ def parsing():
     descr_save = "Use this flag if you want to save the figures upon execution"
     descr_std = "Use this flag to standardise the data to have 0 mean and" \
         " unit variance"
-    descr_log = "Use this flag to apply a log to the data"
+    descr_minMax = "Use this flag if you want to normalise (min-max scaling)" \
+        "the data to the range [0-1]"
 
     parser = argparse.ArgumentParser(description=descr)
 
@@ -78,7 +87,7 @@ def parsing():
     parser.add_argument("-proj3D", action="store_true", help=descr_proj3D)
     parser.add_argument("-save", action="store_true", help=descr_save)
     parser.add_argument("-std", action="store_true", help=descr_std)
-    parser.add_argument("-log", action="store_true", help=descr_log)
+    parser.add_argument("-minMax", action="store_true", help=descr_minMax)
 
     args = parser.parse_args()
 
@@ -91,9 +100,9 @@ def parsing():
     proj3D = args.proj3D
     flag_save = args.save
     flag_std = args.std
-    flag_log = args.log
+    flag_minMax = args.minMax
 
-    return csvPath, rounded, proj3D, flag_save, flag_std, flag_log
+    return csvPath, rounded, proj3D, flag_save, flag_std, flag_minMax
 
 
 def getPCA(dfData):
@@ -106,6 +115,7 @@ def getPCA(dfData):
     pca = PCA()
     X_r = pca.fit_transform(dfData)
 
+    """
     # Check that the principal components have variance 1.0 which is equivalent
     # to each coefficient vector having norm 1.0
     coeffVectorNorms = np.linalg.norm(pca.components_.T, axis=0)
@@ -118,28 +128,38 @@ def getPCA(dfData):
                              pca.fit_transform(dfData.values))
     print("PCs can be calculated as dot product of loadings and"
           " original values: " + str(dotProduct))
+    """
 
     return X_r, pca.explained_variance_ratio_, pca.components_
 
 
-def displaySaveLog(csvPath, df, dfData, PCs, loadings, features, fl_save,
-                   fl_std, fl_log):
+def displaySaveLog(csvPath, df, dfData, dfDataScaled,
+                   PCs, loadings, features,
+                   fl_save, fl_std, fl_minMax):
     """
     Print out the information to the terminal
     """
 
-    # Data table
-    dataTitle = "\n## Data table ##\n"
-    print(dataTitle)
+    # Original dataset
+    origTitle = "\n## Original dataset ##\n"
+    print(origTitle)
     print(df)
 
-    # Transformation
-    print("\n## Transformed data ##\n")
-    if fl_std:
-        print("Standardised")
-    elif fl_log:
-        print("Logarithmic")
+    # Data only
+    rawTitle = "\n## Extracted data ##\n"
+    print(rawTitle)
     print(dfData)
+
+    # Transformation
+    transfTitle = "\n## Transformed dataset ##\n"
+    if fl_std:
+        print(transfTitle)
+        print("Standardised (mean=0; std_dev=1)\n")
+        print(dfDataScaled)
+    elif fl_minMax:
+        print(transfTitle)
+        print("MinMax scaled (normalisation)\n")
+        print(dfDataScaled)
 
     # Principal components
     pcTitle = "\n## Principal Components ##\n"
@@ -162,27 +182,25 @@ def displaySaveLog(csvPath, df, dfData, PCs, loadings, features, fl_save,
     # If the save flag was used
     if fl_save:
 
-        # Saving loadings
-        loadingsDf.to_csv(csvPath.replace(".csv", "_loadings.csv"))
-
         # Open file
-        fileLog = open(csvPath.replace(".csv", "_info.txt"), "w")
+        with open(csvPath.replace(".csv", "_info.txt"), "w") as fileLog:
 
-        # Data table
-        fileLog.write(dataTitle)
-        df.to_csv(fileLog)
+            # Original dataset
+            fileLog.write(origTitle)
+            df.to_csv(fileLog)
 
-        # Principal components
-        fileLog.write(pcTitle)
-        for l in pcLines:
-            fileLog.write(l)
+            # Raw data
+            fileLog.write(rawTitle)
+            dfData.to_csv(fileLog)
 
-        # Loadings
-        fileLog.write(loadTitle)
-        loadingsDf.to_csv(fileLog)
+            # Principal components
+            fileLog.write(pcTitle)
+            for l in pcLines:
+                fileLog.write(l)
 
-        # Close file!
-        fileLog.close()
+            # Loadings
+            fileLog.write(loadTitle)
+            loadingsDf.to_csv(fileLog)
 
 
 def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
