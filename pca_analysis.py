@@ -222,7 +222,7 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.set_zlabel("PC3 (" + '{0:g}'.format(PCs[2]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=20)
-        pngPath = csvPath.replace(".csv", "_3D.png")
+        pngPath = csvPath.replace(".csv", "_3D.eps")
     else:
         ax = fig.add_subplot(111)
         for label, col, x, y in zip(ligs, colors, X_r[:, 0], X_r[:, 1]):
@@ -234,7 +234,7 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=30)
-        pngPath = csvPath.replace(".csv", "_2D.png")
+        pngPath = csvPath.replace(".csv", "_2D.eps")
 
     # figTitle = "PCA on " + csvPath + " (PC1=" + pcVals[0] + ", PC2=" +
     # pcVals[1] + ")"
@@ -250,8 +250,13 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
     # Save figures if save flag was used
     if fl_save:
         print("\nSAVING figures\n")
-        fig.savefig(pngPath, bbox_inches="tight")
-        fig_legend.savefig(pngPath.replace(".png", "_legend.png"))
+        fig.savefig(pngPath,
+                    bbox_inches="tight",
+                    format="eps",
+                    dpi=1200)
+        fig_legend.savefig(pngPath.replace(".eps", "_legend.eps"),
+                           format="eps",
+                           dpi=1200)
     # Otherwise show the plots
     else:
         print("\nSHOWING figures\n")
