@@ -208,6 +208,10 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
     Plot the PCA data on 2D plot
     """
 
+    # Set some figure parameters
+    plt.rcParams['xtick.major.pad'] = '8'
+    plt.rcParams['ytick.major.pad'] = '8'
+
     # Main figure
     fig = plt.figure(figsize=(13, 12), dpi=100)
 
