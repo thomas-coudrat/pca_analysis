@@ -12,6 +12,7 @@ from sklearn.decomposition import PCA
 import argparse
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import matplotlib as mpl
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
@@ -21,12 +22,26 @@ def main():
     """
 
     # Collect arguments
-    csvPath, rounded, proj3D, fl_save, fl_std, fl_minMax = parsing()
+    csvPath, rounded, proj3D, fl_save, fl_std, fl_minMax, annotate = parsing()
 
-    # Prepare the data table
-    df = pd.read_csv(filepath_or_buffer=csvPath, index_col=0, sep=",")
-    colors = df.color.values
-    dfData = df.drop("color", axis=1)
+    # Prepare the data table and drop NAs
+    df = pd.read_csv(filepath_or_buffer=csvPath, index_col=0, sep=",").dropna()
+
+    # Use the colors provided
+    if "color" in df.columns:
+        colors = df.color.values
+        dfData = df.drop("color", axis=1)
+        colors = [[int(a) for a in x.split(":")] for x in colors.tolist()]
+    # if not generate a gradient from colormap
+    else:
+        dfData = df
+        cm = plt.get_cmap("magma")
+        cNorm = mpl.colors.Normalize(vmin=0, vmax=len(df.index))
+        scalarMap = mpl.cm.ScalarMappable(norm=cNorm, cmap=cm)
+        colors = [scalarMap.to_rgba(x, bytes=True)[0:3] for x in range(len(df.index))]
+
+
+    # Get the samples and the column assay names (rows and columns)
     samples = dfData.index.values
     features = dfData.columns.values
 
@@ -58,7 +73,7 @@ def main():
     PCs_round = [round(100 * pc, rounded) for pc in PCs]
 
     # Run the plotting function
-    plotPCA(proj3D, X_r, PCs_round, samples, colors, csvPath, fl_save)
+    plotPCA(proj3D, X_r, PCs_round, samples, colors, csvPath, fl_save, annotate)
 
 
 def parsing():
@@ -73,6 +88,7 @@ def parsing():
         " by its variables"
     descr_rounded = "Decimal at which principal components are rounded" \
         " (default=2)"
+    descr_annotate = "Annotate the PCA plot with labels"
     descr_proj3D = "Use this flag for a 3D projection of the data"
     descr_save = "Use this flag if you want to save the figures upon execution"
     descr_std = "Use this flag to standardise the data to have 0 mean and" \
@@ -84,6 +100,7 @@ def parsing():
 
     parser.add_argument("csvPath", help=descr_csvPath)
     parser.add_argument("--rounded", type=int, help=descr_rounded)
+    parser.add_argument("--annotate", action="store_true", help=descr_annotate)
     parser.add_argument("-proj3D", action="store_true", help=descr_proj3D)
     parser.add_argument("-save", action="store_true", help=descr_save)
     parser.add_argument("-std", action="store_true", help=descr_std)
@@ -97,12 +114,13 @@ def parsing():
         rounded = args.rounded
     else:
         rounded = 0
+    annotate = args.annotate
     proj3D = args.proj3D
     flag_save = args.save
     flag_std = args.std
     flag_minMax = args.minMax
 
-    return csvPath, rounded, proj3D, flag_save, flag_std, flag_minMax
+    return csvPath, rounded, proj3D, flag_save, flag_std, flag_minMax, annotate
 
 
 def getPCA(dfData):
@@ -203,7 +221,7 @@ def displaySaveLog(csvPath, df, dfData, dfDataScaled,
             loadingsDf.to_csv(fileLog)
 
 
-def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
+def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save, annotate):
     """
     Plot the PCA data on 2D plot
     """
@@ -233,8 +251,9 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save):
             newCol = makeColor(col)
             ax.scatter(x, y, label=label, color=newCol,
                        marker="o", lw=1, s=800)
-            # ax.annotate(label, xy=(x, y - 0.05), fontsize=10,
-            #             ha='center', va='top')
+            if annotate:
+                ax.annotate(label, xy=(x, y - 0.05), fontsize=30,
+                             ha='center', va='bottom')
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=30)
@@ -272,7 +291,7 @@ def makeColor(colorRGB):
     Get a RGB color (1-255) as input, in string format R:G:B
     And return a RGB color (0-1)
     """
-    return [float(col)/255. for col in colorRGB.split(":")]
+    return [float(col)/255. for col in colorRGB]
 
 
 class col:
