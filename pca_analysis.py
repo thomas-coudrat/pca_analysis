@@ -238,7 +238,7 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save, annotate):
         for label, col, x, y, z in zip(ligs, colors,
                                        X_r[:, 0], X_r[:, 1], X_r[:, 2]):
             newCol = makeColor(col)
-            Axes3D.scatter(ax, x, y, z, label=label, color=newCol,
+            Axes3D.scatter(ax, x, y, z, label=label, c=newCol,
                            marker="o", lw=1, s=800)
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
