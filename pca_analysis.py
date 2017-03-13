@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+# Calculate principal component analysis on multivariate data stored in a .csv
+# file and display it in a 2D plot (optional 3D)
 #
+# https://github.com/thomas-coudrat/pca_analysis
 # Thomas Coudrat <thomas.coudrat@gmail.com>
-# Janurary 2015
 #
 
 from __future__ import unicode_literals, print_function
