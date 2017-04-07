@@ -24,7 +24,8 @@ def main():
     """
 
     # Collect arguments
-    csvPath, rounded, proj3D, fl_save, fl_std, fl_minMax, annotate = parsing()
+    csvPath, rounded, proj3D, fl_saveEPS, fl_savePNG, \
+        fl_std, fl_minMax, annotate = parsing()
 
     # Prepare the data table and drop NAs
     df = pd.read_csv(filepath_or_buffer=csvPath, index_col=0, sep=",").dropna()
@@ -69,13 +70,14 @@ def main():
     # Displaying information to the terminal
     displaySaveLog(csvPath, df, dfData, dfDataScaled,
                    PCs, loadings, features,
-                   fl_save, fl_std, fl_minMax)
+                   fl_saveEPS, fl_savePNG, fl_std, fl_minMax)
 
     # Round PC values for plotting
     PCs_round = [round(100 * pc, rounded) for pc in PCs]
 
     # Run the plotting function
-    plotPCA(proj3D, X_r, PCs_round, samples, colors, csvPath, fl_save, annotate)
+    plotPCA(proj3D, X_r, PCs_round, samples, colors, csvPath,
+            fl_saveEPS, fl_savePNG, annotate)
 
 
 def parsing():
@@ -92,7 +94,8 @@ def parsing():
         " (default=2)"
     descr_annotate = "Annotate the PCA plot with labels"
     descr_proj3D = "Use this flag for a 3D projection of the data"
-    descr_save = "Use this flag if you want to save the figures upon execution"
+    descr_saveEPS = "Use this flag to save the figures in EPS format"
+    descr_savePNG = "Use this flag to save the figures in PNG format"
     descr_std = "Use this flag to standardise the data to have 0 mean and" \
         " unit variance"
     descr_minMax = "Use this flag if you want to normalise (min-max scaling)" \
@@ -104,7 +107,8 @@ def parsing():
     parser.add_argument("--rounded", type=int, help=descr_rounded)
     parser.add_argument("--annotate", action="store_true", help=descr_annotate)
     parser.add_argument("-proj3D", action="store_true", help=descr_proj3D)
-    parser.add_argument("-save", action="store_true", help=descr_save)
+    parser.add_argument("-saveEPS", action="store_true", help=descr_saveEPS)
+    parser.add_argument("-savePNG", action="store_true", help=descr_savePNG)
     parser.add_argument("-std", action="store_true", help=descr_std)
     parser.add_argument("-minMax", action="store_true", help=descr_minMax)
 
@@ -118,11 +122,13 @@ def parsing():
         rounded = 0
     annotate = args.annotate
     proj3D = args.proj3D
-    flag_save = args.save
+    flag_saveEPS = args.saveEPS
+    flag_savePNG = args.savePNG
     flag_std = args.std
     flag_minMax = args.minMax
 
-    return csvPath, rounded, proj3D, flag_save, flag_std, flag_minMax, annotate
+    return csvPath, rounded, proj3D, flag_saveEPS, flag_savePNG, \
+            flag_std, flag_minMax, annotate
 
 
 def getPCA(dfData):
@@ -155,7 +161,7 @@ def getPCA(dfData):
 
 def displaySaveLog(csvPath, df, dfData, dfDataScaled,
                    PCs, loadings, features,
-                   fl_save, fl_std, fl_minMax):
+                   fl_saveEPS, fl_savePNG, fl_std, fl_minMax):
     """
     Print out the information to the terminal
     """
@@ -200,7 +206,7 @@ def displaySaveLog(csvPath, df, dfData, dfDataScaled,
     print(loadingsDf)
 
     # If the save flag was used
-    if fl_save:
+    if fl_saveEPS or fl_savePNG:
 
         # Open file
         with open(csvPath.replace(".csv", "_info.txt"), "w") as fileLog:
@@ -223,7 +229,8 @@ def displaySaveLog(csvPath, df, dfData, dfDataScaled,
             loadingsDf.to_csv(fileLog)
 
 
-def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save, annotate):
+def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath,
+            fl_saveEPS, fl_savePNG, annotate):
     """
     Plot the PCA data on 2D plot
     """
@@ -245,8 +252,11 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save, annotate):
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.set_zlabel("PC3 (" + '{0:g}'.format(PCs[2]) + " %)", fontsize=30)
+        ax.xaxis.labelpad = 20
+        ax.yaxis.labelpad = 20
+        ax.zaxis.labelpad = 20
         ax.tick_params(axis="both", which="major", labelsize=20)
-        pngPath = csvPath.replace(".csv", "_3D.eps")
+        imgPath = csvPath.replace(".csv", "_3D")
     else:
         ax = fig.add_subplot(111)
         for label, col, x, y in zip(ligs, colors, X_r[:, 0], X_r[:, 1]):
@@ -259,7 +269,7 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save, annotate):
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=30)
-        pngPath = csvPath.replace(".csv", "_2D.eps")
+        imgPath = csvPath.replace(".csv", "_2D")
 
     # figTitle = "PCA on " + csvPath + " (PC1=" + pcVals[0] + ", PC2=" +
     # pcVals[1] + ")"
@@ -272,18 +282,18 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath, fl_save, annotate):
                   loc="center", fancybox=True,
                   shadow=True, prop={"size": 30})
 
-    # Save figures if save flag was used
-    if fl_save:
-        print("\nSAVING figures\n")
-        fig.savefig(pngPath,
-                    bbox_inches="tight",
-                    format="eps",
-                    dpi=1200)
-        fig_legend.savefig(pngPath.replace(".eps", "_legend.eps"),
-                           format="eps",
-                           dpi=1200)
+    # Save figures if in EPS and/or PNG format
+    if fl_saveEPS:
+        print("\nSAVING figures in EPS format\n")
+        fig.savefig(imgPath + ".eps", bbox_inches="tight", dpi=1200)
+        fig_legend.savefig(imgPath + "_legend.eps", dpi=1200)
+    if fl_savePNG:
+        print("\nSAVING figures in PNG format\n")
+        fig.savefig(imgPath + ".png", bbox_inches="tight", dpi=300)
+        fig_legend.savefig(imgPath + "_legend.png", dpi=300)
+
     # Otherwise show the plots
-    else:
+    if not fl_saveEPS and not fl_savePNG:
         print("\nSHOWING figures\n")
         plt.show()
 
