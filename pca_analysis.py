@@ -41,8 +41,8 @@ def main():
         cm = plt.get_cmap("magma")
         cNorm = mpl.colors.Normalize(vmin=0, vmax=len(df.index))
         scalarMap = mpl.cm.ScalarMappable(norm=cNorm, cmap=cm)
-        colors = [scalarMap.to_rgba(x, bytes=True)[0:3] for x in range(len(df.index))]
-
+        colors = [scalarMap.to_rgba(x, bytes=True)[0:3]
+                  for x in range(len(df.index))]
 
     # Get the samples and the column assay names (rows and columns)
     samples = dfData.index.values
@@ -128,7 +128,7 @@ def parsing():
     flag_minMax = args.minMax
 
     return csvPath, rounded, proj3D, flag_saveEPS, flag_savePNG, \
-            flag_std, flag_minMax, annotate
+        flag_std, flag_minMax, annotate
 
 
 def getPCA(dfData):
@@ -265,7 +265,7 @@ def plotPCA(proj3D, X_r, PCs, ligs, colors, csvPath,
                        marker="o", lw=1, s=800)
             if annotate:
                 ax.annotate(label, xy=(x, y - 0.05), fontsize=30,
-                             ha='center', va='bottom')
+                            ha='center', va='bottom')
         ax.set_xlabel("PC1 (" + '{0:g}'.format(PCs[0]) + " %)", fontsize=30)
         ax.set_ylabel("PC2 (" + '{0:g}'.format(PCs[1]) + " %)", fontsize=30)
         ax.tick_params(axis="both", which="major", labelsize=30)
@@ -318,6 +318,7 @@ class col:
     end = '\033[0m'
     BOLD = '\033[1m'
     red = '\033[31m'
+
 
 if __name__ == "__main__":
     main()
